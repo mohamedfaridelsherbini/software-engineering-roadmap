@@ -1,0 +1,32 @@
+name: Weekly Roadmap Summary
+
+on:
+  schedule:
+    - cron: "0 9 * * MON"  # Runs every Monday at 9 AM UTC
+
+jobs:
+  roadmap-summary:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Generate Progress Report
+        run: |
+          echo "## Weekly Roadmap Summary 🚀" > weekly_report.md
+          echo "" >> weekly_report.md
+          echo "### ✅ Completed Tasks:" >> weekly_report.md
+          echo "" >> weekly_report.md
+          git log --pretty=format:"- %s" --since="7 days ago" --grep="Marked issue" >> weekly_report.md
+          echo "" >> weekly_report.md
+          echo "### 📌 Pending Tasks:" >> weekly_report.md
+          grep "\- \[ \]" README.md >> weekly_report.md || echo "All tasks are complete!" >> weekly_report.md
+          cat weekly_report.md
+
+      - name: Commit and Push Report
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "actions@github.com"
+          git add weekly_report.md
+          git commit -m "Weekly roadmap summary update"
+          git push
